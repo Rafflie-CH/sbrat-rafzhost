@@ -8,71 +8,48 @@ import ChatBubble from "@/components/ChatBubble";
 
 export default function Room({ params }) {
   const [messages, setMessages] = useState([]);
-  const [me, setMe] = useState(null);
+  const [me, setMe] = useState("");
   const [txt, setTxt] = useState("");
-  const [loading, setLoading] = useState(true);
 
   const room = params.room;
 
-  // fungsi ambil pesan
-  const loadMessages = async () => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.href = "/auth/login";
       return;
     }
 
-    try {
-      const res = await fetch(`/api/dm/room?room=${room}`, {
-        cache: "no-store",
-        headers: {
-          authorization: token,
-        },
-      });
+    setMe(token);
 
-      const data = await res.json();
-      setMessages(data.messages || []);
-      setMe(data.me || null);
-    } catch (err) {
-      console.error("ERR LOAD MSG:", err);
-    }
-  };
-
-  // load pertama + auto refresh
-  useEffect(() => {
-    loadMessages().finally(() => setLoading(false));
-
-    const interval = setInterval(() => {
-      loadMessages();
-    }, 3000); // refresh setiap 3 detik
-
-    return () => clearInterval(interval);
+    fetch(`/api/dm/room?room=${room}`, {
+      cache: "no-store",
+      headers: { authorization: token },
+    })
+      .then((r) => r.json())
+      .then((d) => setMessages(d.messages || []));
   }, []);
 
-  // fungsi kirim pesan
   const send = async () => {
     if (!txt.trim()) return;
 
     const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
 
     await fetch("/api/dm/send", {
       method: "POST",
-      headers: {
-        authorization: token,
-        "Content-Type": "application/json",
-      },
+      headers: { authorization: token },
       body: JSON.stringify({ text: txt, room }),
     });
 
     setTxt("");
-    await loadMessages();
-  };
 
-  if (loading) return <p className="p-6">Loading...</p>;
+    const res = await fetch(`/api/dm/room?room=${room}`, {
+      cache: "no-store",
+      headers: { authorization: token },
+    });
+
+    setMessages((await res.json()).messages || []);
+  };
 
   return (
     <div className="p-6">
