@@ -8,40 +8,71 @@ import ChatBubble from "@/components/ChatBubble";
 
 export default function Room({ params }) {
   const [messages, setMessages] = useState([]);
-  const [me, setMe] = useState("");
+  const [me, setMe] = useState(null);
   const [txt, setTxt] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const room = params.room;
 
-  useEffect(() => {
+  // fungsi ambil pesan
+  const loadMessages = async () => {
     const token = localStorage.getItem("token");
-    setMe(token);
+    if (!token) {
+      window.location.href = "/auth/login";
+      return;
+    }
 
-    fetch(`/api/dm/room?room=${room}`, {
-      headers: { authorization: token }
-    })
-      .then(r => r.json())
-      .then(d => setMessages(d.messages));
+    try {
+      const res = await fetch(`/api/dm/room?room=${room}`, {
+        cache: "no-store",
+        headers: {
+          authorization: token,
+        },
+      });
+
+      const data = await res.json();
+      setMessages(data.messages || []);
+      setMe(data.me || null);
+    } catch (err) {
+      console.error("ERR LOAD MSG:", err);
+    }
+  };
+
+  // load pertama + auto refresh
+  useEffect(() => {
+    loadMessages().finally(() => setLoading(false));
+
+    const interval = setInterval(() => {
+      loadMessages();
+    }, 3000); // refresh setiap 3 detik
+
+    return () => clearInterval(interval);
   }, []);
 
+  // fungsi kirim pesan
   const send = async () => {
     if (!txt.trim()) return;
 
     const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/auth/login";
+      return;
+    }
 
     await fetch("/api/dm/send", {
       method: "POST",
-      headers: { authorization: token },
+      headers: {
+        authorization: token,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ text: txt, room }),
     });
 
     setTxt("");
-
-    const res = await fetch(`/api/dm/room?room=${room}`, {
-      headers: { authorization: token },
-    });
-    setMessages((await res.json()).messages);
+    await loadMessages();
   };
+
+  if (loading) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="p-6">
