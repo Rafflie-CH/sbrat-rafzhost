@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
+
+import { useEffect, useState } from "react";
 
 export default function Profile() {
   const [me, setMe] = useState(null);
@@ -13,7 +13,6 @@ export default function Profile() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    // kalau belum login → redirect ke login
     if (!token) {
       window.location.href = "/auth/login";
       return;
@@ -28,12 +27,11 @@ export default function Profile() {
         setMe(d.user || null);
         setStickers(d.stickers || []);
       })
-      .catch((err) => console.error("ERR PROFILE:", err))
+      .catch((err) => console.error("PROFILE ERR:", err))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="p-6">Loading...</p>;
-
   if (!me) return <p className="p-6">Gagal memuat profil.</p>;
 
   return (
@@ -51,7 +49,7 @@ export default function Profile() {
             key={s.slug}
             className="border p-2 rounded dark:border-neutral-700"
           >
-            <img src={s.url} alt={s.slug} />
+            <img src={s.url} />
             <a
               href={`/s/${s.slug}`}
               className="block text-center mt-1 underline"
