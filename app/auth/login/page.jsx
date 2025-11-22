@@ -24,7 +24,7 @@ export default function Login() {
 
     // Simpan token
     localStorage.setItem("token", data.token);
-
+localStorage.setItem("role", data.role); // ← ADMIN CHECK
     // REDIRECT PENTING!!!
     window.location.href = "/profile";
   };
