@@ -23,7 +23,7 @@ export default function DM() {
 
     fetch("/api/dm/room", {
       cache: "no-store",
-      headers: { authorization: token },
+      headers: { Authorization: token },
     })
       .then((r) => r.json())
       .then((d) => setRooms(d.rooms || []));
