@@ -6,17 +6,23 @@ export const fetchCache = "force-no-store";
 import { useEffect, useState } from "react";
 
 export default function Profile() {
+  const [ready, setReady] = useState(false);
+  const [token, setToken] = useState("");
   const [me, setMe] = useState(null);
   const [stickers, setStickers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+  // CEK TOKEN
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const t = localStorage.getItem("token");
+    if (!t) return (window.location.href = "/auth/login");
 
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
+    setToken(t);
+    setReady(true);
+  }, []);
+
+  // FETCH PROFIL
+  useEffect(() => {
+    if (!ready) return;
 
     fetch("/api/user/me", {
       cache: "no-store",
@@ -26,13 +32,10 @@ export default function Profile() {
       .then((d) => {
         setMe(d.user || null);
         setStickers(d.stickers || []);
-      })
-      .catch((err) => console.error("PROFILE ERR:", err))
-      .finally(() => setLoading(false));
-  }, []);
+      });
+  }, [ready]);
 
-  if (loading) return <p className="p-6">Loading...</p>;
-  if (!me) return <p className="p-6">Gagal memuat profil.</p>;
+  if (!ready || !me) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="p-6">
