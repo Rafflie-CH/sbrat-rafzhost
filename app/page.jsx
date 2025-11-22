@@ -10,15 +10,14 @@ export default function Home() {
   const [ready, setReady] = useState(false);
   const [stickers, setStickers] = useState([]);
 
+  // CEK TOKEN DULU
   useEffect(() => {
     const t = localStorage.getItem("token");
-    if (!t) {
-      window.location.href = "/auth/login";
-      return;
-    }
+    if (!t) return (window.location.href = "/auth/login");
     setReady(true);
   }, []);
 
+  // FETCH FYP SETELAH TOKEN KEBACA
   useEffect(() => {
     if (!ready) return;
 
