@@ -33,7 +33,7 @@ export default function StickerMaker() {
 
     await fetch("/api/stickers/draft", {
       method: "POST",
-      headers: { authorization: token },
+      headers: { Authorization: token },
       body: JSON.stringify({ url }),
     });
 
