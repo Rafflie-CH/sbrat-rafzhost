@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import ChatBubble from "@/components/ChatBubble";
 
 export default function Room({ params }) {
+  const [ready, setReady] = useState(false);
+  const [token, setToken] = useState("");
   const [messages, setMessages] = useState([]);
   const [me, setMe] = useState("");
   const [txt, setTxt] = useState("");
@@ -14,11 +16,15 @@ export default function Room({ params }) {
   const room = params.room;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
+    const t = localStorage.getItem("token");
+    if (!t) return (window.location.href = "/auth/login");
+
+    setToken(t);
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
 
     setMe(token);
 
@@ -28,12 +34,10 @@ export default function Room({ params }) {
     })
       .then((r) => r.json())
       .then((d) => setMessages(d.messages || []));
-  }, []);
+  }, [ready]);
 
   const send = async () => {
     if (!txt.trim()) return;
-
-    const token = localStorage.getItem("token");
 
     await fetch("/api/dm/send", {
       method: "POST",
@@ -50,6 +54,8 @@ export default function Room({ params }) {
 
     setMessages((await res.json()).messages || []);
   };
+
+  if (!ready) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="p-6">
