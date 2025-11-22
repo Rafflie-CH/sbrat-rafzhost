@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function Login() {
   const [u, setU] = useState("");
   const [p, setP] = useState("");
   const [err, setErr] = useState("");
@@ -12,26 +12,26 @@ export default function LoginPage() {
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: u, password: p }),
     });
 
     const data = await res.json();
 
     if (!data.token) {
-      setErr(data.error || "Login gagal");
+      setErr(data.error || "Gagal login");
       return;
     }
 
+    // Simpan token
     localStorage.setItem("token", data.token);
-    window.location.href = "/"; // masuk ke home
+
+    // REDIRECT PENTING!!!
+    window.location.href = "/profile";
   };
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-
-      {err && <p className="text-red-500 mb-2">{err}</p>}
+      <h1 className="text-2xl font-bold mb-3">Login</h1>
 
       <input
         className="border p-2 w-full mb-2"
@@ -39,23 +39,21 @@ export default function LoginPage() {
         value={u}
         onChange={(e) => setU(e.target.value)}
       />
-
       <input
-        className="border p-2 w-full mb-3"
-        type="password"
+        className="border p-2 w-full mb-2"
         placeholder="Password"
+        type="password"
         value={p}
         onChange={(e) => setP(e.target.value)}
       />
 
-      <button
-        className="bg-black w-full text-white p-2 rounded"
-        onClick={login}
-      >
+      {err && <p className="text-red-500 mb-2">{err}</p>}
+
+      <button className="bg-black text-white w-full p-2 rounded" onClick={login}>
         Login
       </button>
 
-      <p className="mt-4">
+      <p className="mt-3">
         Belum punya akun?{" "}
         <a href="/auth/register" className="underline">
           Daftar
@@ -63,4 +61,4 @@ export default function LoginPage() {
       </p>
     </div>
   );
-    }
+}
