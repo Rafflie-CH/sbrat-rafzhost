@@ -30,7 +30,7 @@ export default function Room({ params }) {
 
     fetch(`/api/dm/room?room=${room}`, {
       cache: "no-store",
-      headers: { authorization: token },
+      headers: { Authorization: token },
     })
       .then((r) => r.json())
       .then((d) => setMessages(d.messages || []));
@@ -41,7 +41,7 @@ export default function Room({ params }) {
 
     await fetch("/api/dm/send", {
       method: "POST",
-      headers: { authorization: token },
+      headers: { Authorization: token },
       body: JSON.stringify({ text: txt, room }),
     });
 
@@ -49,7 +49,7 @@ export default function Room({ params }) {
 
     const res = await fetch(`/api/dm/room?room=${room}`, {
       cache: "no-store",
-      headers: { authorization: token },
+      headers: { Authorization: token },
     });
 
     setMessages((await res.json()).messages || []);
