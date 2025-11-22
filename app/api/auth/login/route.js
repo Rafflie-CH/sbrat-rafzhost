@@ -7,7 +7,6 @@ export async function POST(req) {
   try {
     const { username, password } = await req.json();
 
-    // Ambil user
     const { data: user, error } = await supabase
       .from("users")
       .select("*")
@@ -28,13 +27,14 @@ export async function POST(req) {
       });
     }
 
-    // RETURN TOKEN (id user)
+    // FIX: return token yg BENER (user.id)
     return NextResponse.json({
       ok: true,
       token: user.id,
     });
 
   } catch (e) {
+    console.error("LOGIN ERROR:", e);
     return NextResponse.json({
       ok: false,
       error: "Server error",
