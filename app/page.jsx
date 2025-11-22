@@ -10,8 +10,7 @@ export default function Home() {
   const [stickers, setStickers] = useState([]);
 
   useEffect(() => {
-    const base = "";
-     fetch(`/api/fyp`, { cache: "no-store" })
+    fetch(`/api/fyp`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         setStickers(data.stickers || []);
