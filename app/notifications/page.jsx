@@ -6,15 +6,20 @@ export const fetchCache = "force-no-store";
 import { useEffect, useState } from "react";
 
 export default function Notifications() {
+  const [ready, setReady] = useState(false);
+  const [token, setToken] = useState("");
   const [list, setList] = useState([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const t = localStorage.getItem("token");
+    if (!t) return (window.location.href = "/auth/login");
 
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
+    setToken(t);
+    setReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
 
     fetch("/api/notif/get", {
       cache: "no-store",
@@ -22,7 +27,9 @@ export default function Notifications() {
     })
       .then((r) => r.json())
       .then((d) => setList(d.notif || []));
-  }, []);
+  }, [ready]);
+
+  if (!ready) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="p-6">
