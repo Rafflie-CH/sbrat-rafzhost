@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 import { v4 as uuid } from "uuid";
