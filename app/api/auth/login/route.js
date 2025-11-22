@@ -20,9 +20,10 @@ export async function POST(req) {
       return NextResponse.json({ ok: false, error: "Password salah" });
 
     return NextResponse.json({
-      ok: true,
-      token: user.id, // FIX PALING PENTING
-    });
+  ok: true,
+  token: user.id,
+  role: user.role, // ← TAMBAHKAN INI
+});
 
   } catch (e) {
     return NextResponse.json({ ok: false, error: "Server error" });
