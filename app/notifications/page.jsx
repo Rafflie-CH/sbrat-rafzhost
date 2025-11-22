@@ -23,7 +23,7 @@ export default function Notifications() {
 
     fetch("/api/notif/get", {
       cache: "no-store",
-      headers: { authorization: token },
+      headers: { Authorization: token },
     })
       .then((r) => r.json())
       .then((d) => setList(d.notif || []));
