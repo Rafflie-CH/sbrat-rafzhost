@@ -26,7 +26,7 @@ export default function Profile() {
 
     fetch("/api/user/me", {
       cache: "no-store",
-      headers: { authorization: token },
+      headers: { Authorization: token },
     })
       .then((r) => r.json())
       .then((d) => {
