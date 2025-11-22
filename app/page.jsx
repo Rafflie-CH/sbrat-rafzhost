@@ -1,3 +1,8 @@
+"use client";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import StickerCard from "@/components/StickerCard";
 
 export default async function Home() {
