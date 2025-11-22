@@ -28,10 +28,10 @@ export async function POST(req) {
       });
     }
 
-    // TOKEN = user.id
+    // RETURN TOKEN (id user)
     return NextResponse.json({
       ok: true,
-      token: String(user.id), // pastiin jadi STRING
+      token: user.id,
     });
 
   } catch (e) {
