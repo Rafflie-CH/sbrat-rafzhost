@@ -13,23 +13,10 @@ export default function StickerMaker() {
   const generate = async () => {
     if (!t.trim()) return;
 
-    const token = localStorage.getItem("token");
-
-    // wajib login
-    if (!token) {
-      window.location.href = "/auth/login";
-      return;
-    }
-
     setLoading(true);
 
-    // generate gambar brat
     const res = await fetch("/api/generate", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
       body: JSON.stringify({
         text: t,
         background: "#ffffff",
@@ -40,18 +27,13 @@ export default function StickerMaker() {
 
     const data = await res.json();
     const url = data.url;
+    setGenList((prev) => [...prev, url]);
 
-    // tampilkan hasil di UI
-    setGenList((prev) => [url, ...prev]);
+    const token = localStorage.getItem("token");
 
-    // simpan ke draft user (butuh login)
     await fetch("/api/stickers/draft", {
       method: "POST",
-      cache: "no-store",
-      headers: {
-        authorization: token,
-        "Content-Type": "application/json",
-      },
+      headers: { authorization: token },
       body: JSON.stringify({ url }),
     });
 
@@ -80,7 +62,7 @@ export default function StickerMaker() {
       <div className="grid grid-cols-2 gap-3 mt-6">
         {genList.map((u, i) => (
           <div key={i} className="border p-2 rounded">
-            <img src={u} alt="Generated Sticker" />
+            <img src={u} />
           </div>
         ))}
       </div>
