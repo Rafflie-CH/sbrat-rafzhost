@@ -1,41 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
-import { useEffect, useState } from "react";
-
 export default function Profile() {
-  const [ready, setReady] = useState(false);
-  const [token, setToken] = useState("");
   const [me, setMe] = useState(null);
   const [stickers, setStickers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // CEK TOKEN
   useEffect(() => {
-    const t = localStorage.getItem("token");
-    if (!t) return (window.location.href = "/auth/login");
+    const token = localStorage.getItem("token");
 
-    setToken(t);
-    setReady(true);
-  }, []);
-
-  // FETCH PROFIL
-  useEffect(() => {
-    if (!ready) return;
+    if (!token) {
+      window.location.href = "/auth/login";
+      return;
+    }
 
     fetch("/api/user/me", {
       cache: "no-store",
-      headers: { Authorization: token },
+      headers: {
+        Authorization: token, // ← FIX PENTING
+      },
     })
       .then((r) => r.json())
       .then((d) => {
-        setMe(d.user || null);
-        setStickers(d.stickers || []);
-      });
-  }, [ready]);
+        if (!d.ok) {
+          window.location.href = "/auth/login";
+          return;
+        }
 
-  if (!ready || !me) return <p className="p-6">Loading...</p>;
+        setMe(d.user);
+        setStickers(d.stickers || []);
+      })
+      .catch(() => window.location.href = "/auth/login")
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="p-6">Loading...</p>;
+  if (!me) return <p className="p-6">Gagal memuat profil.</p>;
 
   return (
     <div className="p-6">
@@ -48,15 +52,9 @@ export default function Profile() {
 
       <div className="grid grid-cols-2 gap-3">
         {stickers.map((s) => (
-          <div
-            key={s.slug}
-            className="border p-2 rounded dark:border-neutral-700"
-          >
+          <div key={s.slug} className="border p-2 rounded">
             <img src={s.url} />
-            <a
-              href={`/s/${s.slug}`}
-              className="block text-center mt-1 underline"
-            >
+            <a href={`/s/${s.slug}`} className="block text-center mt-1 underline">
               Detail
             </a>
           </div>
