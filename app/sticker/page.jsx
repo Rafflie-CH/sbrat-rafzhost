@@ -1,4 +1,8 @@
 "use client";
+
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 import { useState } from "react";
 
 export default function StickerMaker() {
@@ -9,10 +13,23 @@ export default function StickerMaker() {
   const generate = async () => {
     if (!t.trim()) return;
 
+    const token = localStorage.getItem("token");
+
+    // wajib login
+    if (!token) {
+      window.location.href = "/auth/login";
+      return;
+    }
+
     setLoading(true);
 
+    // generate gambar brat
     const res = await fetch("/api/generate", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
       body: JSON.stringify({
         text: t,
         background: "#ffffff",
@@ -23,13 +40,18 @@ export default function StickerMaker() {
 
     const data = await res.json();
     const url = data.url;
-    setGenList((prev) => [...prev, url]);
 
-    const token = localStorage.getItem("token");
+    // tampilkan hasil di UI
+    setGenList((prev) => [url, ...prev]);
 
+    // simpan ke draft user (butuh login)
     await fetch("/api/stickers/draft", {
       method: "POST",
-      headers: { authorization: token },
+      cache: "no-store",
+      headers: {
+        authorization: token,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ url }),
     });
 
@@ -58,7 +80,7 @@ export default function StickerMaker() {
       <div className="grid grid-cols-2 gap-3 mt-6">
         {genList.map((u, i) => (
           <div key={i} className="border p-2 rounded">
-            <img src={u} />
+            <img src={u} alt="Generated Sticker" />
           </div>
         ))}
       </div>
