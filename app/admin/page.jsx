@@ -8,32 +8,45 @@ import { useEffect, useState } from "react";
 export default function Admin() {
   const [users, setUsers] = useState([]);
   const [stickers, setStickers] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
 
-    fetch("/api/admin/check", { headers: { authorization: token } })
+    // CEK DARI CLIENT DULU
+    if (!token || role !== "admin") {
+      window.location.href = "/";
+      return;
+    }
+
+    // CEK SERVER (API)
+    fetch("/api/admin/check", {
+      headers: { Authorization: token },
+      cache: "no-store",
+    })
       .then(r => r.json())
       .then(d => {
-        if (!d.ok) window.location.href = "/";
+        if (!d.ok) {
+          window.location.href = "/";
+          return;
+        }
+
+        // load user
+        fetch("/api/admin/users")
+          .then(r => r.json())
+          .then(d => setUsers(d.users || []));
+
+        // load sticker
+        fetch("/api/admin/stickers")
+          .then(r => r.json())
+          .then(d => setStickers(d.stickers || []));
+
+        setLoaded(true);
       });
-
-    fetch("/api/admin/users")
-      .then(r => r.json())
-      .then(d => setUsers(d.users));
-
-    fetch("/api/admin/stickers")
-      .then(r => r.json())
-      .then(d => setStickers(d.stickers));
   }, []);
 
-  const verify = async (id) => {
-    await fetch("/api/admin/verify", {
-      method: "POST",
-      body: JSON.stringify({ id }),
-    });
-    location.reload();
-  };
+  if (!loaded) return <p className="p-6">Loading...</p>;
 
   return (
     <div className="p-6">
